@@ -7,8 +7,8 @@ describe("Page de connexion", ()=> {
   });
 });
 
-describe("Vérification du bouton Ajouter au panier", () => {
-  it("Doit afficher le bouton Ajouter au panier sur une fiche produit après connexion", () => {
+describe("Page produits", () => {
+  it("Doit afficher le bouton Ajouter au panier ainsi que la disponibilité du produit sur une fiche produit après connexion", () => {
     cy.request({
       method: "POST",
       url: `${Cypress.env('apiUrl')}/login`,
@@ -27,6 +27,7 @@ describe("Vérification du bouton Ajouter au panier", () => {
 
       cy.visit("#/products/random");
       cy.contains("Ajouter au panier").should("be.visible");
+      cy.getBySel("detail-product-stock").should("be.visible");
     });
   });
 });
