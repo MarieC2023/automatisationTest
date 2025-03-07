@@ -1,20 +1,30 @@
-beforeEach(() => {
-  cy.request({
-    method: "POST",
-    url: `${Cypress.env("apiUrl")}/login`,
-    body: {
-      username: "test2@test.fr",
-      password: "testtest"
-    }
-  }).then((response) => {
-    expect(response.status).to.eq(200);
-    const token = response.body.token;
+const { faker } = require("@faker-js/faker");
 
-    Cypress.env("authToken", token);
-  });
-});
+
+
+
+// ****************************************************************************** //
+// ********************************** Tests GET ********************************* //
+// ****************************************************************************** //
+
 
 describe("Test sur le pannier", () => {
+  before(() => {
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      body: {
+        username: "test2@test.fr",
+        password: "testtest"
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      const token = response.body.token;
+
+      Cypress.env("authToken", token);
+    });
+  });
+
   const apiOrders = `${Cypress.env("apiUrl")}/orders`;
 
   context("GET /orders", () => {
@@ -58,6 +68,21 @@ describe("Test sur le pannier", () => {
 });
 
 describe("Test sur la fiche produit", () => {
+  before(() => {
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      body: {
+        username: "test2@test.fr",
+        password: "testtest"
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      const token = response.body.token;
+
+      Cypress.env("authToken", token);
+    });
+  });
 
   const apiProducts = `${Cypress.env("apiUrl")}/products/random`;
 
@@ -82,7 +107,51 @@ describe("Test sur la fiche produit", () => {
       expect(response.body[0]).to.have.property("price");
       expect(response.body[0]).to.have.property("picture");
       expect(response.body[0]).to.have.property("varieties");
-      
+
     });
   });
 });
+
+
+// ****************************************************************************** //
+// ********************************** Tests POST ******************************** //
+// ****************************************************************************** //
+
+describe("Test sur la page login", () => {
+
+  it("La requête retourne un code 401 en cas d'erreur d'identification", () => {
+    let fakerUserName = faker.internet.email();
+    let fakerPassword = faker.internet.password();
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      failOnStatusCode: false,
+      body: {
+        username: fakerUserName,
+        password: fakerPassword
+      }
+
+    }).then((response) => {
+      expect(response.status).to.eq(401);
+
+    });
+  });
+  it("La requête retourne un code 200 si l'utilisateur est connu", () => {
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      body: {
+        username: "test2@test.fr",
+        password: "testtest"
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+    });
+
+  });
+});
+
+
+
+
+
