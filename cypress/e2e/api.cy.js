@@ -8,7 +8,7 @@ const { faker } = require("@faker-js/faker");
 // ****************************************************************************** //
 
 
-describe("Test sur le pannier", () => {
+describe("Test GET sur le pannier", () => {
   before(() => {
     cy.request({
       method: "POST",
@@ -67,7 +67,7 @@ describe("Test sur le pannier", () => {
   });
 });
 
-describe("Test sur la fiche produit", () => {
+describe("Test GET sur la fiche produit", () => {
   before(() => {
     cy.request({
       method: "POST",
@@ -86,7 +86,7 @@ describe("Test sur la fiche produit", () => {
 
   const apiProducts = `${Cypress.env("apiUrl")}/products/random`;
 
-  it("La requête doit me renvoyer la liste de trois produits aléatoire", () => {
+  it("La requête doit me renvoyer une liste d'au moins un produit aléatoire", () => {
     cy.request({
       method: "GET",
       url: apiProducts,
@@ -96,7 +96,7 @@ describe("Test sur la fiche produit", () => {
     }).then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.be.an("array");
-      expect(response.body.length).to.be.greaterThan(0);
+      expect(response.body.length).to.be.greaterThan(1);
 
       expect(response.body[0]).to.have.property("id");
       expect(response.body[0]).to.have.property("name");
@@ -117,7 +117,7 @@ describe("Test sur la fiche produit", () => {
 // ********************************** Tests POST ******************************** //
 // ****************************************************************************** //
 
-describe("Test sur la page login", () => {
+describe("Test POST sur la page login", () => {
 
   it("La requête retourne un code 401 en cas d'erreur d'identification", () => {
     let fakerUserName = faker.internet.email();
@@ -151,7 +151,79 @@ describe("Test sur la page login", () => {
   });
 });
 
+describe("Test PUT sur le panier", () => {
+  beforeEach(() => {
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      body: {
+        username: "test2@test.fr",
+        password: "testtest"
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      const token = response.body.token;
 
+      Cypress.env("authToken", token);
+    });
 
+    cy.request({
+      method: "GET",
+      url: `${Cypress.env("apiUrl")}/products`,
+      headers: {
+        Authorization: `Bearer ${Cypress.env("authToken")}`
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
 
+      const produits = response.body;
+      const produitEnStock = produits.find(p => p.availableStock > 0);
+      const produitEnRupture = produits.find(p => p.availableStock <= 0);
 
+      cy.wrap(produitEnStock).as("produitEnStock");
+      cy.wrap(produitEnRupture).as("produitEnRupture");
+    });
+  });
+
+  it("Ajoute un produit en stock au panier", () => {
+    cy.get("@produitEnStock").then((produit) => {
+      expect(produit).to.not.be.undefined;
+  
+      cy.request({
+        method: "PUT",
+        url: `${Cypress.env("apiUrl")}/orders/add`,
+        headers: {
+          Authorization: `Bearer ${Cypress.env("authToken")}`
+        },
+        body: {
+          product: produit.id,
+          quantity: 1
+        }
+      }).then((response) => {
+        expect(response.status).to.eq(200);
+      });
+    });
+  });
+  
+  it("N'ajoute pas un produit en rupture de stock", () => {
+    cy.get("@produitEnRupture").then((produit) => {
+      expect(produit).to.not.be.undefined;
+  
+      cy.request({
+        method: "PUT",
+        url: `${Cypress.env("apiUrl")}/orders/add`,
+        headers: {
+          Authorization: `Bearer ${Cypress.env("authToken")}`
+        },
+        body: {
+          product: produit.id,
+          quantity: 1
+        },
+        failOnStatusCode: false 
+      }).then((response) => {
+        expect(response.status).to.not.eq(200);
+      });
+    });
+  });
+  
+});
