@@ -227,3 +227,81 @@ describe("Test PUT sur le panier", () => {
   });
   
 });
+
+describe("Test sur l'ajout d'avis", () => {
+  beforeEach(() => {
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/login`,
+      body: {
+        username: "test2@test.fr",
+        password: "testtest"
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      const token = response.body.token;
+
+      Cypress.env("authToken", token);
+    });
+  });
+
+  it("L'avis est ajouter si tous les champs sont correctement rempli", () => {
+   
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/reviews`,
+      headers: {
+        Authorization: `Bearer ${Cypress.env("authToken")}`
+      },
+      body: {
+        title: "chouette",
+        comment: "mais le prix ça pique",
+        rating: 2
+      }
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+    });
+  });
+
+  it("L'avis n'est pas ajouter si des champs sont manquants", () => {
+   
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/reviews`,
+      headers: {
+        Authorization: `Bearer ${Cypress.env("authToken")}`
+      },
+      body: {
+        title: "chouette",
+        rating: 2
+      },
+      failOnStatusCode: false
+    }).then((response) => {
+      expect(response.status).to.eq(400);
+      expect(response.body).to.have.property("error");
+    });
+  });
+
+  it("Test un risque de faille XSS", () => {
+   const testXSS = `<script>alert("XSS");</script>`;
+
+    cy.request({
+      method: "POST",
+      url: `${Cypress.env("apiUrl")}/reviews`,
+      headers: {
+        Authorization: `Bearer ${Cypress.env("authToken")}`
+      },
+      body: {
+        title: "test XSS",
+        comment: testXSS,
+        rating: 5
+      },
+      failOnStatusCode: false
+    }).then((response) => {
+     
+      expect(response.status).to.eq(400);
+      expect(response.body).to.have.property("error");
+    });
+  });
+});
+
