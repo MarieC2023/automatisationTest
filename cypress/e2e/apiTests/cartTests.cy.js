@@ -1,6 +1,6 @@
-import { login } from "../services/apiAuth";
-import { getCart, addToCart } from "../services/apiCart";
-import { getProducts } from "../services/apiProducts";
+import { login } from "../../services/apiAuth";
+import { getCart, addToCart } from "../../services/apiCart";
+import { getProducts } from "../../services/apiProducts";
 
 
 describe("Test GET sur le pannier sans connection", () => {

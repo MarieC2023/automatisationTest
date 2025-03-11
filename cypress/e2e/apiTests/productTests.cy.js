@@ -1,5 +1,5 @@
-import { login } from "../services/apiAuth";
-import { getRandomProduct } from "../services/apiProducts";
+import { login } from "../../services/apiAuth";
+import { getRandomProduct } from "../../services/apiProducts";
 
 describe("Test GET sur une fiche produit aléatoire", () => {
   let authToken;

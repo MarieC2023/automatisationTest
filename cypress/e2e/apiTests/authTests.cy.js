@@ -1,4 +1,4 @@
-import { login } from "../services/apiAuth";
+import { login } from "../../services/apiAuth";
 import { faker } from "@faker-js/faker";
 
 describe("Tests d'authentification", () => {

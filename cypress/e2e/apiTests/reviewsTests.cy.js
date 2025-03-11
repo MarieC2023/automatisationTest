@@ -1,5 +1,5 @@
-import { login } from "../services/apiAuth";  
-import { addReview } from "../services/apiReviews";
+import { login } from "../../services/apiAuth";  
+import { addReview } from "../../services/apiReviews";
 
 
 describe("Test sur l'ajout d'avis", () => {
