@@ -1,0 +1,88 @@
+import { login } from "../services/apiAuth";
+import { getCart, addToCart } from "../services/apiCart";
+import { getProducts } from "../services/apiProducts";
+
+
+describe("Test GET sur le pannier sans connection", () => {
+    context("GET /orders", () => {
+      it("La requête doit me retourner un code erreur 401 si l'utilisateur n'est pas connecté", () => {
+       getCart().then((response) => {
+          expect(response.status).to.eq(401);
+        });
+      });
+    });
+  });
+
+
+describe("Test sur le pannier si l'utilisateur est connecté", () => {
+  let authToken;  
+
+  beforeEach(() => {
+    login("test2@test.fr", "testtest").then((response) => {
+      expect(response.status).to.eq(200);
+      authToken = Cypress.env("authToken");
+    });
+  });
+
+  it("La requête doit me renvoyer la liste des produits qui sont dans le panier", () => {
+    getCart(authToken).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.property("orderLines").that.is.an("array");
+
+      if (response.body.orderLines.length > 0) {
+        response.body.orderLines.forEach((line) => {
+          expect(line).to.have.property("id");
+          expect(line).to.have.property("quantity");
+          expect(line).to.have.property("product");
+
+          expect(line.product).to.have.property("id");
+          expect(line.product).to.have.property("name");
+          expect(line.product).to.have.property("price");
+        });
+      } else {
+        cy.log("Le panier est vide");
+      }
+    });
+  });
+
+});
+
+describe("Test PUT sur le panier", () => {
+  let authToken;
+  let produitEnStock;
+  let produitEnRupture;
+
+  beforeEach(() => {
+    cy.wrap(null).then(() => {
+      return login("test2@test.fr", "testtest");
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      authToken = response.body.token; // Récupère bien le token ici
+
+      return getProducts(authToken);
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      const produits = response.body;
+      produitEnStock = produits.find((p) => p.availableStock > 0);
+      produitEnRupture = produits.find((p) => p.availableStock <= 0);
+    });
+  });
+
+  it("Ajoute un produit en stock au panier", () => {
+    cy.wrap(null).then(() => {
+      expect(produitEnStock).to.not.be.undefined;
+      return addToCart(authToken, produitEnStock.id, 1);
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+    });
+  });
+
+  it("N'ajoute pas un produit en rupture de stock", () => {
+    cy.wrap(null).then(() => {
+      expect(produitEnRupture).to.not.be.undefined;
+      return addToCart(authToken, produitEnRupture.id, 1);
+    }).then((response) => {
+      expect(response.status).to.not.eq(200);
+    });
+  });
+});
