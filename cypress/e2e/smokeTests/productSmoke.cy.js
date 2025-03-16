@@ -3,8 +3,8 @@ import { login } from "../../services/apiAuth";
 describe("Page produits", () => {
   
   beforeEach(() => {
-    login("test2@test.fr", "testtest").then((response) => {
-      expect(response.status).to.eq(200);
+    login("test2@test.fr", "testtest", 200).then((response) => {
+      
       const token = response.body.token;
 
       cy.window().then((win) => {

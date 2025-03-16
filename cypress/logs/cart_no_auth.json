@@ -1,0 +1,8 @@
+{
+  "status": 401,
+  "body": {
+    "code": 401,
+    "message": "JWT Token not found"
+  },
+  "timestamp": "2025-03-16T14:33:09.277Z"
+}

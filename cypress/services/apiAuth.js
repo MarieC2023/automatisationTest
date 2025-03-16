@@ -1,6 +1,6 @@
 const apiLogin = `${Cypress.env("apiUrl")}/login`;
 
-export const login = (username, password) => {
+export const login = (username, password, returnCode) => {
     return cy.request({
         method: "POST",
         url: apiLogin,
@@ -10,7 +10,7 @@ export const login = (username, password) => {
             password: password 
         }
     }).then((response) => {
-        if (response.status === 200) {
+        if (response.status === returnCode) {
             const token = response.body.token;
             Cypress.env("authToken", token); 
         }

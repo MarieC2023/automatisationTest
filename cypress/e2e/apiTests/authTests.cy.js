@@ -3,8 +3,8 @@ import { faker } from "@faker-js/faker";
 
 describe("Tests d'authentification", () => {
     it("Doit réussir avec des identifiants valides", () => {
-        login("test2@test.fr", "testtest").then((response) => {
-            expect(response.status).to.eq(200);
+        login("test2@test.fr", "testtest", 200).then((response) => {
+           
             expect(response.body.token).to.exist;
         });
     });

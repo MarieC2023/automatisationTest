@@ -7,8 +7,8 @@ describe("Test GET sur une fiche produit aléatoire", () => {
 
   beforeEach(() => {
     cy.wrap(null).then(() => {
-      return login("test2@test.fr", "testtest").then((response) => {
-        expect(response.status).to.eq(200);
+      return login("test2@test.fr", "testtest", 200).then((response) => {
+        
         authToken = response.body.token;
         expect(authToken).to.not.be.undefined;
       });

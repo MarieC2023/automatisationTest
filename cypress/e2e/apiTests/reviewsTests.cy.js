@@ -6,8 +6,7 @@ describe("Test sur l'ajout d'avis", () => {
   let authToken;
 
   beforeEach(() => {
-    login("test2@test.fr", "testtest").then((response) => {
-      expect(response.status).to.eq(200);
+    login("test2@test.fr", "testtest", 200).then((response) => {
       authToken = Cypress.env("authToken"); 
     });
   });

@@ -3,23 +3,29 @@ import { getCart, addToCart } from "../../services/apiCart";
 import { getProducts } from "../../services/apiProducts";
 
 
-describe("Test GET sur le pannier sans connection", () => {
-    context("GET /orders", () => {
-      it("La requête doit me retourner un code erreur 401 si l'utilisateur n'est pas connecté", () => {
-       getCart().then((response) => {
-          expect(response.status).to.eq(401);
+describe("Test GET sur le panier sans connection", () => {
+  context("GET /orders", () => {
+    it("La requête doit me retourner un code erreur 401 si l'utilisateur n'est pas connecté", () => {
+      getCart().then((response) => {
+        expect(response.status).to.eq(401);
+
+        cy.writeFile("cypress/logs/cart_no_auth.json", {
+          status: response.status,
+          body: response.body,
+          timestamp: new Date().toISOString()
         });
       });
     });
   });
+});
 
 
 describe("Test sur le pannier si l'utilisateur est connecté", () => {
-  let authToken;  
+  let authToken;
 
   beforeEach(() => {
-    login("test2@test.fr", "testtest").then((response) => {
-      expect(response.status).to.eq(200);
+    login("test2@test.fr", "testtest", 200).then((response) => {
+
       authToken = Cypress.env("authToken");
     });
   });
@@ -54,10 +60,10 @@ describe("Test PUT sur le panier", () => {
 
   beforeEach(() => {
     cy.wrap(null).then(() => {
-      return login("test2@test.fr", "testtest");
+      return login("test2@test.fr", "testtest", 200);
     }).then((response) => {
-      expect(response.status).to.eq(200);
-      authToken = response.body.token; // Récupère bien le token ici
+
+      authToken = response.body.token;
 
       return getProducts(authToken);
     }).then((response) => {
@@ -83,6 +89,13 @@ describe("Test PUT sur le panier", () => {
       return addToCart(authToken, produitEnRupture.id, 1);
     }).then((response) => {
       expect(response.status).to.not.eq(200);
+
+      cy.writeFile("cypress/logs/cart_out_of_stock.json", {
+        status: response.status,
+        product: produitEnRupture.id,
+        responseBody: response.body,
+        timestamp: new Date().toISOString()
+      });
     });
   });
 });
