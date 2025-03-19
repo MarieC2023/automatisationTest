@@ -1,42 +1,37 @@
-//ici je veux testser la page de connexion
-// 1 cliquez sur le bouton de connexion
-// 2 affichage de la page avec le formulaire
-// 3 entrez les info de connexion email + mdp
-// 4 être rediriger vers page accueil 
-// 5 vérifier la présence du bouton panier
+import credentials from '../../fixtures/credentials.json';
 
 describe('Test de connexion', () => {
-  it("Devrait se connecter et rediriger vers la page d'accueil avec le bouton Mon panier", () => {
-    
-    cy.visit('baseUrl');
+  beforeEach(() => {
+    cy.visit(credentials.baseURL);
+    cy.screenshot("avant-connexion")
+    cy.intercept('POST','/login').as('loginRequest');
+  })
 
-    cy.intercept('POST', '/login').as('loginRequest'); 
-     
-    cy.getBySel("nav-link-login").click();
-      
-    cy.getBySel("login-input-username").type('test2@test.fr');
-    cy.getBySel("login-input-password").type('testtest');
-    cy.getBySel("login-submit").click();
+  it("Devrait se connecter et afficher le bouton Mon panier", () => {
+    cy.goToLoginPage();
+    cy.screenshot("page-login");
 
-    
-    cy.wait('@loginRequest')
-      .then((interception) => {
-        expect(interception.request.body).to.deep.equal({
-          username: 'test2@test.fr', 
-          password: 'testtest'
-        });
+    cy.login();
+    cy.screenshot("formulaire-rempli");
 
-        expect(interception.response.body).to.have.property('token');
+    cy.wait('@loginRequest').then((interception) => {
+      expect(interception.request.body).to.deep.equal({
+        username: credentials.user.username,
+        password: credentials.user.password
       });
-
-    const token = 'token';
-    cy.window().then((win) => {
-      win.localStorage.setItem("user", token);
+      expect(interception.response.body).to.have.property('token');
+      
+      const token = interception.response.body.token;
+      cy.window().then((win) => {
+        win.localStorage.setItem("user", token);
+      });
     });
+    cy.url().should('eq', `${credentials.baseURL}/#/`);
+    cy.screenshot("apres-redirection");
 
-    cy.url().should('eq', "http://localhost:8080/#/");
-   
     cy.getBySel("nav-link-cart").should('be.visible');
+    cy.getBySel("nav-link-cart").screenshot("bouton-panier-seul");
 
   });
 });
+        
