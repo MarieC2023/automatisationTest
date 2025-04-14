@@ -1,4 +1,4 @@
-import credentials from '../../fixtures/credentials.json';
+import credentials from "../../fixtures/credentials.json";
 
 describe('Test de connexion', () => {
   beforeEach(() => {
