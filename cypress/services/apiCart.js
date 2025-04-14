@@ -18,3 +18,16 @@ export const addToCart = (token, productId, quantity = 1) => {
         body: { product: productId, quantity }
     });
 };
+
+export const clearCart = (token, orderLineId) => {
+    return cy.request({
+        method: "DELETE",
+        url: `${Cypress.env('apiUrl')}/orders/${orderLineId}/delete`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200);
+        return response.body;
+    });
+};

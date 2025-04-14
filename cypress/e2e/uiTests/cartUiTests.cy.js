@@ -3,7 +3,7 @@ import credentials from "../../fixtures/credentials.json";
 
 
 import { getRandomProduct } from "../../services/apiProducts";
-import { getCart } from "../../services/apiCart";
+import { getCart, clearCart } from "../../services/apiCart";
 
 describe("Ajout au panier - Stock décrémenté", () => {
   let token;
@@ -20,6 +20,28 @@ describe("Ajout au panier - Stock décrémenté", () => {
         win.localStorage.setItem("user", token);
       });
     });
+  });
+
+  afterEach("Supprimer les éléments du panier", () => {
+    if (!token) {
+      cy.log("Aucun token disponible, suppression du panier impossible");
+      return;
+    }
+
+    getCart(token).then((cart) => {
+      const lines = cart.body.orderLines;
+
+      if (lines?.length) {
+        cy.log(`Suppression de ${lines.length} éléments du panier`);
+        lines.forEach((orderLine) => {
+          clearCart(token, orderLine.id);
+        });
+      } else {
+        cy.log("Aucun élément à supprimer")
+      };
+    });
+
+    cy.get(selectors.logoutButton).click();
   });
 
   it("Produit ajouté au panier, stock déduit", () => {
