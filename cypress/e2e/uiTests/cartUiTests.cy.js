@@ -22,7 +22,7 @@ describe("Ajout au panier - Stock décrémenté", () => {
     });
   });
 
-  it.only("Produit ajouté au panier, stock déduit", () => {
+  it("Produit ajouté au panier, stock déduit", () => {
     getRandomProduct(token).then((response) => {
       const product = response.body[0];
       const productId = product.id;
