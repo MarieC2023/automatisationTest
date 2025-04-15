@@ -9,11 +9,11 @@ describe("Ajout au panier - Stock décrémenté", () => {
   let token;
 
   beforeEach(() => {
-    
+
     cy.visit(credentials.baseURL);
     cy.intercept("POST", "/login").as("loginRequest");
     cy.goToLoginPage();
-    cy.login(); 
+    cy.login();
     cy.wait("@loginRequest").then((interception) => {
       token = interception.response.body.token;
       cy.window().then((win) => {
@@ -52,6 +52,7 @@ describe("Ajout au panier - Stock décrémenté", () => {
       const productStock = product.availableStock;
 
       cy.visit(`/#/products/${productId}`);
+      cy.screenshot("cartUiTests/1-FicheProduit-Avant-Ajout");
 
       cy.get(selectors.productName).should("contain", productName);
       cy.get(selectors.productStock).should("contain", productStock);
@@ -60,9 +61,12 @@ describe("Ajout au panier - Stock décrémenté", () => {
       cy.get(selectors.addToCartButton).click();
 
       cy.url().should("include", "/#/cart");
+      cy.screenshot("cartUiTests/2-Panier-Après-Ajout");
+
       cy.get(selectors.cartLineName).should("contain", productName);
 
       cy.visit(`/#/products/${productId}`);
+      cy.screenshot("cartUiTests/3-FicheProduit-Après-Ajout");
 
       cy.get(selectors.productStock).should("contain", productStock - 1);
     });
@@ -79,7 +83,9 @@ describe("Ajout au panier - Stock décrémenté", () => {
       cy.get(selectors.productName).should("contain", productName);
       cy.get(selectors.productStock).should("contain", productStock);
 
+      cy.screenshot("cartUiTests/4-FicheProduit-Avant-Saisie-Négative");
       cy.get(selectors.quantityInput).clear().type("-1");
+      cy.screenshot("cartUiTests/5-Saisie-Négative");
       cy.get(selectors.quantityInput).should("have.class", "ng-invalid");
       cy.get(selectors.quantityInput).should("have.value", "1");
     });
@@ -96,7 +102,10 @@ describe("Ajout au panier - Stock décrémenté", () => {
       cy.get(selectors.productName).should("contain", productName);
       cy.get(selectors.productStock).should("contain", productStock);
 
+      cy.screenshot("cartUiTests/6-FicheProduit-Avant-Saisie-21");
       cy.get(selectors.quantityInput).clear().type("21");
+      cy.screenshot("cartUiTests/7-Saisie-Supérieure-À-20");
+
       cy.get(selectors.quantityInput).should("have.value", "20")
     });
   });
@@ -113,25 +122,36 @@ describe("Ajout au panier - Stock décrémenté", () => {
       cy.get(selectors.productName).should("contain", productName);
       cy.get(selectors.productStock).should("contain", productStock);
 
+      cy.screenshot("cartUiTests/8-FicheProduit-Avant-Ajout-API");
+
       cy.get(selectors.quantityInput).clear().type("1");
       cy.get(selectors.addToCartButton).click();
 
       cy.url().should("include", "/#/cart");
       cy.get(selectors.cartLineName).should("contain", productName);
 
+      cy.screenshot("cartUiTests/9-Panier-Après-Ajout-API");
+
+      cy.visit(`/#/products/${productId}`);
+      cy.screenshot("cartUiTests/10-FicheProduit-Après-Ajout-API");
+
       getCart(token).then((cartResponse) => {
         const orderLines = cartResponse.body.orderLines;
-  
+
         expect(orderLines).to.have.length.greaterThan(0);
         const addedProduct = orderLines.find(
           (line) => line.product.id === productId
         );
-  
+
         expect(addedProduct).to.exist;
         expect(addedProduct.product.name).to.equal(productName);
         expect(addedProduct.quantity).to.equal(1);
+
+        // Log utile si besoin :
+        cy.log("Vérification API réussie pour le produit ajouté");
+      });
     });
   });
 });
-});
+
 
