@@ -147,7 +147,6 @@ describe("Ajout au panier - Stock décrémenté", () => {
         expect(addedProduct.product.name).to.equal(productName);
         expect(addedProduct.quantity).to.equal(1);
 
-        // Log utile si besoin :
         cy.log("Vérification API réussie pour le produit ajouté");
       });
     });
