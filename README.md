@@ -144,4 +144,4 @@ Le projet contient également un dossier `docs/` avec :
 
 ---
 
-📫 Pour toute question, merci de contacter **Marie COLLET** via [LinkedIn](https://www.linkedin.com/in/marie-collet-2a0278220) ou directement sur GitHub.
+📫 Pour toute question, merci de me contacter **Marie COLLET** via [LinkedIn](https://www.linkedin.com/in/marie-collet-2a0278220) ou directement sur GitHub **MarieC2023**.
